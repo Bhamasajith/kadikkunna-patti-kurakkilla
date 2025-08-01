@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+  <meta charset="UTF-8">
+  <title>പട്ടി കടിക്കുമൊ?</title>
+  <script defer src="https://unpkg.com/face-api.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 20px;
+      background-color: #fffbe7;
+    }
+    video, canvas {
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      margin: 10px 0;
+    }
+    #result {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #ff5722;
+      margin-top: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1em;
+      background-color: #ff9800;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    #feedback-section {
+      display: none;
+      margin-top: 20px;
+    }
+    textarea {
+      width: 80%;
+      padding: 10px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>പട്ടിയുടെ കൈയാന് സ്കാന് ചെയ്യൂ!</h1>
+  <video id="video" width="320" height="240" autoplay muted></video>
+  <div>
+    <button onclick="predictBehavior()">സ്കാന് ചെയ്യു</button>
+  </div>
+  <div id="result"></div>
+
+  <div id="feedback-section">
+    <p>പ്രതിയുക്കായിരുന്നു പ്രതിയൂത്തോ? അഥ്യ്യം ඉത്തരം:</p>
+    <button onclick="handleFeedback('Yes')">അഥ്യം</button>
+    <button onclick="handleFeedback('No')">അല്ലേന്കി</button>
+    <p style="margin-top: 20px;">നിംഗളുടെ അനുഭവമായ അനുഭവം:</p>
+    <textarea placeholder="Comment here..."></textarea>
+  </div>
+
+  <script>
+    const behaviors = [
+      'ഇത്തുക്കും! 😱',
+      'കുരക്കും മാത്രം! 🐕',
+      'കിടക്കാന് പോകുന്നു... 😪'
+    ];
+
+    const video = document.getElementById('video');
+
+    async function startVideo() {
+      await navigator.mediaDevices.getUserMedia({ video: {} })
+        .then(stream => video.srcObject = stream)
+        .catch(err => console.error('Camera error:', err));
+    }
+
+    async function predictBehavior() {
+      const result = document.getElementById('result');
+      const feedback = document.getElementById('feedback-section');
+      feedback.style.display = 'none';
+      result.innerText = 'Analyzing dog face...';
+      setTimeout(() => {
+        const random = behaviors[Math.floor(Math.random() * behaviors.length)];
+        result.innerText = random;
+        setTimeout(() => {
+          feedback.style.display = 'block';
+        }, 3000);
+      }, 2000);
+    }
+
+    function handleFeedback(response) {
+      alert('Thank you for your feedback: ' + response);
+    }
+
+    startVideo();
+  </script>
+</body>
+</html>

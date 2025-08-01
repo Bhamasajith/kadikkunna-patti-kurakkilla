@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+  <meta charset="UTF-8">
+  <title>patti kadikkumo?</title>
+  <script defer src="https://unpkg.com/face-api.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 20px;
+      background-color: #fffbe7;
+    }
+    video, canvas {
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      margin: 10px 0;
+    }
+    #result {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #ff5722;
+      margin-top: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1em;
+      background-color: #ff9800;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    #feedback-section {
+      display: none;
+      margin-top: 20px;
+    }
+    textarea {
+      width: 80%;
+      padding: 10px;
+      margin-top: 10px;
+    }
+    #rescan-button, #refresh-button {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Pattiye scan cheyyu kuttii😌</h1>
+  <video id="video" width="320" height="240" autoplay muted></video>
+  <div>
+    <button id="scan-button" onclick="predictBehavior()">Scan cheyyu</button>
+    <button id="rescan-button" onclick="resetScan()">Scan another patti 🐶</button>
+    <button id="refresh-button" onclick="refreshPage()">🔄 Refresh Page</button>
+  </div>
+  <div id="result"></div>
+
+  <div id="feedback-section">
+    <p style="margin-top: 20px;">How was prediction?😂</p>
+    <button onclick="handleFeedback('Yes')">Tharakkedillada mone</button><br>
+    <button onclick="handleFeedback('No')">vechitt poda</button>
+  </div>
+
+  <script>
+    const behaviors = [
+      'Velachiledkarth kettoo...Njan kadikkum!👺',
+      'No kadi,only kura!!😉',
+      'ninne njaan pinne edtholaa kuttaa..!!',
+      'ninne kandtt kadikan thonnunnillaaa',
+      'pedikanda, oodikkoo',
+      'fear aayo monusee😹'
+    ];
+
+    const video = document.getElementById('video');
+    const canvas = document.createElement('canvas');
+    const result = document.getElementById('result');
+    const feedback = document.getElementById('feedback-section');
+    const scanBtn = document.getElementById('scan-button');
+    const rescanBtn = document.getElementById('rescan-button');
+    const refreshBtn = document.getElementById('refresh-button');
+    let context;
+
+    async function startVideo() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+      } catch (err) {
+        console.error('Camera access error:', err);
+      }
+    }
+
+    function predictBehavior() {
+      result.innerText = 'Pattinireekshanam on progress...';
+      feedback.style.display = 'none';
+      scanBtn.style.display = 'none';
+
+      setTimeout(() => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        context = canvas.getContext('2d');
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        const avgBrightness = getAverageBrightness(imageData.data);
+
+        let prediction;
+        if (avgBrightness < 50) {
+          prediction = 'Velachiledkarth kettoo...Njan kadikkum!👺';
+        } else if (avgBrightness > 160) {
+          prediction =
+          
+      'No kadi,only kura!!😉';
+        
+        } else {
+          prediction = 'ninne njaan pinne edtholaa kuttaa..!!';
+        }
+
+        result.innerText = prediction;
+
+        setTimeout(() => {
+          feedback.style.display = 'block';
+          rescanBtn.style.display = 'inline-block';
+          refreshBtn.style.display = 'inline-block';
+        }, 3000);
+      }, 2000);
+    }
+
+    function getAverageBrightness(data) {
+      let total = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        const brightness = (data[i] + data[i + 1] + data[i + 2]) / 3;
+        total += brightness;
+      }
+      return total / (data.length / 4);
+    }
+
+    function handleFeedback(response) {
+      alert('Thanks for feedback: ' + response);
+    }
+
+    function resetScan() {
+      result.innerText = '';
+      feedback.style.display = 'none';
+      scanBtn.style.display = 'inline-block';
+      rescanBtn.style.display = 'none';
+    }
+
+    function refreshPage() {
+      location.reload();
+    }
+
+    startVideo();
+  </script>
+</body>
+</html>

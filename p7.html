@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dog Facial Expression Analyzer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 1rem;
+        }
+
+        .upload-area {
+            border: 3px dashed #3498db;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            background: #f8f9fa;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #2980b9;
+            background: #e3f2fd;
+            transform: translateY(-2px);
+        }
+
+        .upload-area.dragover {
+            border-color: #27ae60;
+            background: #e8f5e8;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #3498db;
+            margin-bottom: 1rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-text {
+            color: #2c3e50;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-hint {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 10px;
+            margin: 1rem 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .analysis-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            display: none;
+        }
+
+        .analysis-section.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .mood-indicator {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .mood-calm {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            color: #155724;
+            border-left: 5px solid #28a745;
+        }
+
+        .mood-alert {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            color: #856404;
+            border-left: 5px solid #ffc107;
+        }
+
+        .mood-aggressive {
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            color: #721c24;
+            border-left: 5px solid #dc3545;
+        }
+
+        .mood-confused {
+            background: linear-gradient(135deg, #e2e3e5, #d6d8db);
+            color: #383d41;
+            border-left: 5px solid #6c757d;
+        }
+
+        .mood-icon {
+            font-size: 2rem;
+        }
+
+        .confidence-bar {
+            background: #e9ecef;
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.8s ease;
+        }
+
+        .details {
+            background: white;
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .analyzing {
+            text-align: center;
+            padding: 2rem;
+            color: #3498db;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e3f2fd;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐕 Dog Expression Analyzer</h1>
+            <p>Upload a photo to analyze your dog's facial expression and mood</p>
+        </div>
+
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">📷</div>
+            <div class="upload-text">Click to upload or drag & drop</div>
+            <div class="upload-hint">Supports JPG, PNG, GIF files</div>
+            <input type="file" class="file-input" id="fileInput" accept="image/*">
+        </div>
+
+        <div class="analysis-section" id="analysisSection">
+            <div class="analyzing" id="analyzing" style="display: none;">
+                <div class="spinner"></div>
+                <div>Analyzing facial expression...</div>
+            </div>
+
+            <div id="results" style="display: none;">
+                <div class="mood-indicator" id="moodIndicator">
+                    <div class="mood-icon" id="moodIcon">😊</div>
+                    <div>
+                        <div id="moodText">Calm and Friendly</div>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" id="confidenceFill"></div>
+                        </div>
+                        <small id="confidenceText">Confidence: 85%</small>
+                    </div>
+                </div>
+
+                <div class="details">
+                    <h3 style="margin-bottom: 1rem; color: #2c3e50;">Analysis Details</h3>
+                    <div class="detail-item">
+                        <span>Eyes:</span>
+                        <span id="eyeAnalysis">Relaxed, soft gaze</span>
+                    </div>
+                    <div class="detail-item">
+                        <span>Mouth/Tongue:</span>
+                        <span id="mouthAnalysis">Slightly open, tongue visible</span>
+                    </div>
+                    <div class="detail-item">
+                        <span>Ears:</span>
+                        <span id="earAnalysis">Forward, alert but relaxed</span>
+                    </div>
+                    <div class="detail-item">
+                        <span>Overall Body Language:</span>
+                        <span id="bodyAnalysis">Relaxed posture</span>
+                    </div>
+                    <div class="detail-item">
+                        <span>Bite Risk:</span>
+                        <span id="biteRisk" style="color: #28a745; font-weight: bold;">Low</span>
+                    </div>
+                </div>
+
+                <div style="margin-top: 1rem; padding: 1rem; background: #e3f2fd; border-radius: 10px; font-size: 0.9rem; color: #1565c0;">
+                    <strong>Note:</strong> This analysis is for entertainment purposes. Always observe your dog's full body language and consult with a professional trainer or veterinarian for behavioral concerns.
+                </div>
+            </div>
+        </div>
+
+        <button class="btn" onclick="resetAnalyzer()" style="display: none;" id="resetBtn">Analyze Another Photo</button>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const analysisSection = document.getElementById('analysisSection');
+        const analyzing = document.getElementById('analyzing');
+        const results = document.getElementById('results');
+        const resetBtn = document.getElementById('resetBtn');
+
+        // Mock analysis data for different expressions
+        const expressions = [
+            {
+                mood: 'calm',
+                text: 'Calm and Friendly',
+                icon: '😊',
+                confidence: 85,
+                eyes: 'Relaxed, soft gaze',
+                mouth: 'Slightly open, tongue visible',
+                ears: 'Forward, alert but relaxed',
+                body: 'Relaxed posture',
+                risk: 'Low',
+                riskColor: '#28a745'
+            },
+            {
+                mood: 'alert',
+                text: 'Alert and Attentive',
+                icon: '👀',
+                confidence: 78,
+                eyes: 'Wide, focused attention',
+                mouth: 'Closed, slightly tense',
+                ears: 'Perked up, forward facing',
+                body: 'Upright, attentive stance',
+                risk: 'Low-Medium',
+                riskColor: '#ffc107'
+            },
+            {
+                mood: 'aggressive',
+                text: 'Warning Signs - Potential Aggression',
+                icon: '😠',
+                confidence: 92,
+                eyes: 'Har
